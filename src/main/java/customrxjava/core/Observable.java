@@ -4,8 +4,11 @@ import app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Observable<T> {
 
@@ -33,7 +36,7 @@ public class Observable<T> {
     ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
 
-        Observer<T> actual = new Observer<>() {
+        Observer<T> observer = new Observer<>() {
             @Override
             public void onNext(T item) {
                 if (!cancelled.get()) onNext.accept(item);
@@ -55,9 +58,9 @@ public class Observable<T> {
         };
 
         try {
-            onSubscribe.call(actual);
+            onSubscribe.call(observer);
         } catch (Throwable ex) {
-            actual.onError(ex);
+            observer.onError(ex);
         }
 
         return new Disposable() {
@@ -90,6 +93,30 @@ public class Observable<T> {
                         item -> scheduler.execute(() -> observer.onNext(item)),
                         err  -> scheduler.execute(() -> observer.onError(err)),
                         ()   -> scheduler.execute(observer::onComplete)
+                )
+        );
+    }
+
+    public <R> Observable<R> map(Function<? super T, ? extends R> mapper) {
+        Objects.requireNonNull(mapper);
+        return create(subObs ->
+                this.subscribe(
+                        t -> subObs.onNext(mapper.apply(t)),
+                        subObs::onError,
+                        subObs::onComplete
+                )
+        );
+    }
+
+    public Observable<T> filter(Predicate<? super T> predicate) {
+        Objects.requireNonNull(predicate);
+        return create(subObs ->
+                this.subscribe(
+                        t -> {
+                            if (predicate.test(t)) subObs.onNext(t);
+                        },
+                        subObs::onError,
+                        subObs::onComplete
                 )
         );
     }
