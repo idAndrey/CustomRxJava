@@ -24,7 +24,7 @@
 * onError(Throwable t) — обрабатывает ошибки
 * onComplete() — вызывается при завершении потока  
 
-Класс `Observable`, реализующий интерфейс `Observer` с поддержкой подписки (subscribe).  
+Класс `Observable` с поддержкой подписки (subscribe).  
 В классе `Observable` реализован статический метод `create()`, позволяющий создавать объекты Observable.
 Класс `Observable` отвечает за создание источника данных и публикацию данных подписчикам в порядке, в котором элементы потока данных были созданы.
 
@@ -39,7 +39,24 @@
 
 ## Управление потоками выполнения
 
+Пользовательская версия библиотеки RxJava предоставляет следующие классы, реализующие интерфейс `Scheduler`:
+```java
+public interface Scheduler {
+    void execute(Runnable task);
+}
+```
+* IOThreadScheduler
+* ComputationScheduler
+* SingleThreadScheduler
 
+Данные классы обеспечивают возможность управления потоком выполнения для `Observable` по аналогии соответственно с:
+* Schedulers.io()
+* Schedulers.computation()
+* Schedulers.single()
+
+Для поддержки управления потоками класса `Observable` реализованы методы: 
+* subscribeOn(Scheduler scheduler), чтобы подписка выполнялась в заданном потоке;
+* observeOn(Scheduler scheduler), чтобы обработка элементов происходила в нужном потоке.  
 ---
 
 ## Управление подписками и дополнительные операторы
