@@ -134,6 +134,18 @@ public interface Disposable {
 
 ## Тестирование
 
+Примеры использования пользовательской версии библиотеки RxJava представлены в **демонстрационной программе** app.Application.  
+Запуск программы:  
+
+```bash
+   java -jar target/customrxjava-1.0-SNAPSHOT.jar
+```
+или  
+```bash
+   mvn exec:java
+```
+
+
 ### Тесты для ключевых компонентов системы
 
 В класс `BaseCoreTest` проверяется:
